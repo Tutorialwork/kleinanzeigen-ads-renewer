@@ -1,23 +1,25 @@
 package dev.manuelschuler.kleinanzeigenadsrenewer.config;
 
 import dev.manuelschuler.kleinanzeigenadsrenewer.model.ImapServer;
+import java.util.List;
+import java.util.Map;
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-@ConfigurationProperties(prefix = "imap.server")
+@ConfigurationProperties(prefix = "imap")
 @Data
 public class ImapServerConfig {
 
-    private String host;
-    private String username;
-    private String password;
+  private Map<String, ImapServer> servers;
 
-    @Bean
-    public ImapServer imapServer() {
-        return new ImapServer(this.host, this.username, this.password);
-    }
-
+  @Bean
+  public List<ImapServer> imapServers() {
+    this.servers
+        .keySet()
+        .forEach(serverName -> this.servers.get(serverName).setFriendlyName(serverName));
+    return this.servers.values().stream().toList();
+  }
 }
