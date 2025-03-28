@@ -1,4 +1,4 @@
-name: Deploy Docker Image
+name: Bump version
 
 on:
   push:
@@ -23,6 +23,7 @@ jobs:
 
       - name: Commit report
         run: |
+          git checkout main
           git config --global user.name 'CI Bot'
           git config --global user.email 'ci-bot@users.noreply.github.com'
           git commit -am "Bump version to ${{ github.ref_name }}"
