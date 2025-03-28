@@ -1,9 +1,11 @@
 name: Deploy Docker Image
 
 on:
-  push:
-    tags:
-      - '*'
+  workflow_run:
+    workflows:
+      - 'Bump version'
+    types:
+      - completed
 
 jobs:
   build_and_push:
