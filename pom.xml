@@ -81,12 +81,13 @@
                 <artifactId>spring-boot-maven-plugin</artifactId>
                 <configuration>
                     <image>
+                        <name>ghcr.io/tutorialwork/kleinanzeigen-ads-renewer:${version}</name>
                         <buildpacks>
                             <buildpack>paketobuildpacks/java</buildpack>
                         </buildpacks>
                         <env>
                             <BP_JVM_VERSION>21</BP_JVM_VERSION>
-                            <BP_JVM_TYPE>JDK</BP_JVM_TYPE>
+                            <BP_JVM_TYPE>JRE</BP_JVM_TYPE>
                         </env>
                     </image>
                     <excludes>

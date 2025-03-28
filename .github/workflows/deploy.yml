@@ -1,0 +1,35 @@
+name: Deploy Docker Image
+
+on:
+  push:
+    tags:
+      - '*'
+
+jobs:
+  build_and_push:
+    runs-on: ubuntu-24.04-arm
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Docker Login
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GHCR_TOKEN }}
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: 'liberica'
+          java-version: '21'
+
+      - name: Build with Maven
+        run: mvn spring-boot:build-image
+
+      - name: Push Docker image
+        run: docker push ghcr.io/tutorialwork/kleinanzeigen-ads-renewer:${{ github.ref_name }}
