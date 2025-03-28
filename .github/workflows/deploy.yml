@@ -30,8 +30,14 @@ jobs:
           distribution: 'liberica'
           java-version: '21'
 
+      - name: Get Maven version
+        run: |
+          VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
+          echo "Project Maven Version: $VERSION"
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
+
       - name: Build with Maven
         run: mvn spring-boot:build-image -DskipTests
 
       - name: Push Docker image
-        run: docker push ghcr.io/tutorialwork/kleinanzeigen-ads-renewer:${{ github.ref_name }}
+        run: docker push ghcr.io/tutorialwork/kleinanzeigen-ads-renewer:${{ env.VERSION }}
