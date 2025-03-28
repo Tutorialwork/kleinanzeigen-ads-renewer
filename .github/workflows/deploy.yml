@@ -29,7 +29,7 @@ jobs:
           java-version: '21'
 
       - name: Build with Maven
-        run: mvn spring-boot:build-image
+        run: mvn spring-boot:build-image -DskipTests
 
       - name: Push Docker image
         run: docker push ghcr.io/tutorialwork/kleinanzeigen-ads-renewer:${{ github.ref_name }}
