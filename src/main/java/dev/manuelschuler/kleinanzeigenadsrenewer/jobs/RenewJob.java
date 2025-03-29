@@ -3,6 +3,7 @@ package dev.manuelschuler.kleinanzeigenadsrenewer.jobs;
 import dev.failsafe.Failsafe;
 import dev.failsafe.FailsafeException;
 import dev.failsafe.RetryPolicy;
+import dev.manuelschuler.kleinanzeigenadsrenewer.config.ImapFolderConfig;
 import dev.manuelschuler.kleinanzeigenadsrenewer.exceptions.ImapServerException;
 import dev.manuelschuler.kleinanzeigenadsrenewer.exceptions.RenewException;
 import dev.manuelschuler.kleinanzeigenadsrenewer.helper.HttpClientHelper;
@@ -31,6 +32,7 @@ import java.util.concurrent.TimeUnit;
 public class RenewJob {
 
     private List<ImapServer> imapServers;
+    private ImapFolderConfig imapFolderConfig;
     private RetryPolicy<Object> retryPolicy;
 
     private final Logger logger = LoggerFactory.getLogger(RenewJob.class);
@@ -84,6 +86,8 @@ public class RenewJob {
                 } catch (FailsafeException exception) {
                     Throwable cause = exception.getCause();
                     this.logger.error("Failed to renew ad because of the following reason: {}", cause.getMessage());
+                    String failedFolderName = this.imapFolderConfig.getFailedFolderName();
+                    MoveMailHelper.moveMail(mail, imapServer.getInboxFolder(), imapServer.getFolder(failedFolderName));
                 }
             });
 
@@ -104,7 +108,8 @@ public class RenewJob {
         Optional<String> errorMessage = resultPageScraper.getErrorMessage();
 
         if (errorMessage.isEmpty()) {
-            MoveMailHelper.moveMail(adMail, imapServer.getInboxFolder(), imapServer.getProcessedMailsFolder());
+            String processedFolderName = this.imapFolderConfig.getProcessedFolderName();
+            MoveMailHelper.moveMail(adMail, imapServer.getInboxFolder(), imapServer.getFolder(processedFolderName));
             this.logger.info("Ad {} was successfully renewed.", mailScraper.getAdName());
         } else {
             throw new RenewException(errorMessage.get());

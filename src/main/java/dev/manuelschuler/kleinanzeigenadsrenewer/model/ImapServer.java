@@ -45,14 +45,14 @@ public class ImapServer {
     }
 
     @SneakyThrows
-    public Folder getProcessedMailsFolder() {
-        Folder processedMailsFolder = this.store.getFolder("Kleinanzeigen Mails");
-        if (!processedMailsFolder.exists()) {
-            processedMailsFolder.create(Folder.HOLDS_MESSAGES);
+    public Folder getFolder(String folderName) {
+        Folder folder = this.store.getFolder(folderName);
+        if (!folder.exists()) {
+            folder.create(Folder.HOLDS_MESSAGES);
         }
 
-        processedMailsFolder.open(Folder.READ_WRITE);
+        folder.open(Folder.READ_WRITE);
 
-        return processedMailsFolder;
+        return folder;
     }
 }
