@@ -1,5 +1,6 @@
 package dev.manuelschuler.kleinanzeigenadsrenewer.helper;
 
+import dev.manuelschuler.kleinanzeigenadsrenewer.exceptions.RenewException;
 import generator.RandomUserAgentGenerator;
 import lombok.SneakyThrows;
 import okhttp3.OkHttpClient;
@@ -27,7 +28,7 @@ public class HttpClientHelper {
 
         int statusCode = response.code();
         if (statusCode != 200) {
-            throw new RuntimeException("Failed to renew ad with status code: " + statusCode);
+            throw new RenewException("Failed to renew ad with status code: " + statusCode);
         }
 
         return response.body().string();

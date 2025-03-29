@@ -1,10 +1,15 @@
 package dev.manuelschuler.kleinanzeigenadsrenewer.jobs;
 
+import dev.failsafe.Failsafe;
+import dev.failsafe.FailsafeException;
+import dev.failsafe.RetryPolicy;
 import dev.manuelschuler.kleinanzeigenadsrenewer.exceptions.ImapServerException;
+import dev.manuelschuler.kleinanzeigenadsrenewer.exceptions.RenewException;
 import dev.manuelschuler.kleinanzeigenadsrenewer.helper.AdMailScraperHelper;
 import dev.manuelschuler.kleinanzeigenadsrenewer.helper.HttpClientHelper;
 import dev.manuelschuler.kleinanzeigenadsrenewer.helper.MoveMailHelper;
 import dev.manuelschuler.kleinanzeigenadsrenewer.model.ImapServer;
+import jakarta.mail.FetchProfile;
 import jakarta.mail.Folder;
 import jakarta.mail.Message;
 import jakarta.mail.MessagingException;
@@ -25,6 +30,7 @@ import java.util.concurrent.TimeUnit;
 public class RenewJob {
 
     private List<ImapServer> imapServers;
+    private RetryPolicy<Object> retryPolicy;
 
     private final Logger logger = LoggerFactory.getLogger(RenewJob.class);
 
@@ -52,12 +58,15 @@ public class RenewJob {
             int messageCount = messages.length - 1;
             int targetIndex = messageCount - READ_LAST_N_MAILS;
 
-            this.logger.info(
-                    "Found {} mail in IMAP server {} to check", messageCount, imapServer.getFriendlyName());
+            Message[] lastMails = Arrays.stream(messages)
+                    .skip(targetIndex)
+                    .toArray(Message[]::new);
+            inboxFolder.fetch(lastMails, new FetchProfile() {{
+                add(FetchProfile.Item.ENVELOPE);
+            }});
 
             List<Message> adMails =
-                    Arrays.stream(messages)
-                            .skip(targetIndex)
+                    Arrays.stream(lastMails)
                             .filter(
                                     mail -> {
                                         try {
@@ -68,10 +77,17 @@ public class RenewJob {
                                     })
                             .toList();
 
-            adMails.forEach(mail -> processAdMail(mail, imapServer));
+            adMails.parallelStream().forEach(mail -> {
+                try {
+                    Failsafe.with(this.retryPolicy).run(() -> this.processAdMail(mail, imapServer));
+                } catch (FailsafeException exception) {
+                    Throwable cause = exception.getCause();
+                    this.logger.error("Failed to renew ad because of the following reason: {}", cause.getMessage());
+                }
+            });
 
             this.logger.info(
-                    "Found {} ad mails for IMAP server {}", adMails.size(), imapServer.getFriendlyName());
+                    "Found {} ad mails out of {} mails for IMAP server {}", adMails.size(), messageCount, imapServer.getFriendlyName());
         } catch (ImapServerException exception) {
             this.logger.error("Failed to connect to the IMAP server: {}", imapServer.getFriendlyName());
         }
@@ -87,7 +103,7 @@ public class RenewJob {
             MoveMailHelper.moveMail(adMail, imapServer.getInboxFolder(), imapServer.getProcessedMailsFolder());
             this.logger.info("Ad was successfully renewed.");
         } else {
-            this.logger.info("Ad failed to renew with the reason: {}", errorMessage.get());
+            throw new RenewException(errorMessage.get());
         }
     }
 }
