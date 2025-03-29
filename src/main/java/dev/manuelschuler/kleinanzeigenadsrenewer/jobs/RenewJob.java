@@ -5,10 +5,11 @@ import dev.failsafe.FailsafeException;
 import dev.failsafe.RetryPolicy;
 import dev.manuelschuler.kleinanzeigenadsrenewer.exceptions.ImapServerException;
 import dev.manuelschuler.kleinanzeigenadsrenewer.exceptions.RenewException;
-import dev.manuelschuler.kleinanzeigenadsrenewer.helper.AdMailScraperHelper;
 import dev.manuelschuler.kleinanzeigenadsrenewer.helper.HttpClientHelper;
 import dev.manuelschuler.kleinanzeigenadsrenewer.helper.MoveMailHelper;
 import dev.manuelschuler.kleinanzeigenadsrenewer.model.ImapServer;
+import dev.manuelschuler.kleinanzeigenadsrenewer.service.AdMailScrapeService;
+import dev.manuelschuler.kleinanzeigenadsrenewer.service.ResultPageScrapeService;
 import jakarta.mail.FetchProfile;
 import jakarta.mail.Folder;
 import jakarta.mail.Message;
@@ -95,13 +96,16 @@ public class RenewJob {
 
     @SneakyThrows
     private void processAdMail(Message adMail, ImapServer imapServer) {
-        String link = AdMailScraperHelper.parseRenewLink(adMail);
+        AdMailScrapeService mailScraper = new AdMailScrapeService(adMail);
+        String link = mailScraper.getRenewLink();
         String resultHtml = HttpClientHelper.doGetRequest(link);
-        Optional<String> errorMessage = AdMailScraperHelper.getResultErrorMessage(resultHtml);
+
+        ResultPageScrapeService resultPageScraper = new ResultPageScrapeService(resultHtml);
+        Optional<String> errorMessage = resultPageScraper.getErrorMessage();
 
         if (errorMessage.isEmpty()) {
             MoveMailHelper.moveMail(adMail, imapServer.getInboxFolder(), imapServer.getProcessedMailsFolder());
-            this.logger.info("Ad was successfully renewed.");
+            this.logger.info("Ad {} was successfully renewed.", mailScraper.getAdName());
         } else {
             throw new RenewException(errorMessage.get());
         }
