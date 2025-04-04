@@ -10,7 +10,7 @@
     </parent>
     <groupId>dev.manuelschuler</groupId>
     <artifactId>kleinanzeigen-ads-renewer</artifactId>
-    <version>1.0.0</version>
+    <version>1.0.1</version>
     <name>kleinanzeigen-ads-renewer</name>
     <description>kleinanzeigen-ads-renewer</description>
     <url/>
