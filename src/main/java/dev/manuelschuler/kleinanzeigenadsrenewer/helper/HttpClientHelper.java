@@ -1,7 +1,6 @@
 package dev.manuelschuler.kleinanzeigenadsrenewer.helper;
 
 import dev.manuelschuler.kleinanzeigenadsrenewer.exceptions.RenewException;
-import generator.RandomUserAgentGenerator;
 import lombok.SneakyThrows;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -13,14 +12,13 @@ public class HttpClientHelper {
     }
 
     @SneakyThrows
-    public static String doGetRequest(String url) {
-        String randomUserAgent = RandomUserAgentGenerator.getNext();
+    public static String doGetRequest(String url, String userAgent) {
         OkHttpClient client = new OkHttpClient().newBuilder().build();
         Request.Builder requestBuilder =
                 new Request.Builder()
                         .url(url)
                         .method("GET", null)
-                        .addHeader("User-Agent", randomUserAgent);
+                        .addHeader("User-Agent", userAgent);
 
         Request request = requestBuilder.build();
 

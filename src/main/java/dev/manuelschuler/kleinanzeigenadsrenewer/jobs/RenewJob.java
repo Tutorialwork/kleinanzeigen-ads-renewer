@@ -11,6 +11,7 @@ import dev.manuelschuler.kleinanzeigenadsrenewer.helper.MoveMailHelper;
 import dev.manuelschuler.kleinanzeigenadsrenewer.model.ImapServer;
 import dev.manuelschuler.kleinanzeigenadsrenewer.service.AdMailScrapeService;
 import dev.manuelschuler.kleinanzeigenadsrenewer.service.ResultPageScrapeService;
+import dev.manuelschuler.kleinanzeigenadsrenewer.service.UserAgentService;
 import jakarta.mail.FetchProfile;
 import jakarta.mail.Folder;
 import jakarta.mail.Message;
@@ -34,6 +35,7 @@ public class RenewJob {
     private List<ImapServer> imapServers;
     private ImapFolderConfig imapFolderConfig;
     private RetryPolicy<Object> retryPolicy;
+    private UserAgentService userAgentService;
 
     private final Logger logger = LoggerFactory.getLogger(RenewJob.class);
 
@@ -100,9 +102,10 @@ public class RenewJob {
 
     @SneakyThrows
     private void processAdMail(Message adMail, ImapServer imapServer) {
+        String userAgent = this.userAgentService.getRandomUserAgent();
         AdMailScrapeService mailScraper = new AdMailScrapeService(adMail);
         String link = mailScraper.getRenewLink();
-        String resultHtml = HttpClientHelper.doGetRequest(link);
+        String resultHtml = HttpClientHelper.doGetRequest(link, userAgent);
 
         ResultPageScrapeService resultPageScraper = new ResultPageScrapeService(resultHtml);
         Optional<String> errorMessage = resultPageScraper.getErrorMessage();
