@@ -47,7 +47,7 @@
         <dependency>
             <groupId>com.sezinkarli</groupId>
             <artifactId>random-user-agent-generator</artifactId>
-            <version>1.1</version>
+            <version>1.3</version>
         </dependency>
         <dependency>
             <groupId>dev.failsafe</groupId>
@@ -86,7 +86,7 @@
                 <artifactId>spring-boot-maven-plugin</artifactId>
                 <configuration>
                     <image>
-                        <name>ghcr.io/tutorialwork/kleinanzeigen-ads-renewer:${version}</name>
+                        <name>ghcr.io/tutorialwork/kleinanzeigen-ads-renewer:${project.version}</name>
                         <buildpacks>
                             <buildpack>paketobuildpacks/java</buildpack>
                         </buildpacks>
