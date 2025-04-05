@@ -29,14 +29,18 @@ jobs:
           distribution: 'liberica'
           java-version: '21'
 
-      - name: Get Maven version
+      - name: Get Maven project version
         run: |
           VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
           echo "Project Maven Version: $VERSION"
           echo "VERSION=$VERSION" >> $GITHUB_ENV
 
-      - name: Build with Maven
-        run: mvn spring-boot:build-image -DskipTests
+      - name: Build JAR with Maven
+        run: mvn clean package -DskipTests
 
-      - name: Push Docker image
-        run: docker push tutorialwork/kleinanzeigen-ads-renewer:${{ env.VERSION }}
+      - name: Build & Push Multi Arch Docker Image
+        run: |
+          docker buildx build --platform linux/amd64,linux/arm64 \
+          -t tutorialwork/kleinanzeigen-ads-renewer:${{ env.VERSION }} \
+          -t tutorialwork/kleinanzeigen-ads-renewer:latest \
+          --push .

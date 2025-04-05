@@ -38,7 +38,7 @@ The host name for iCloud is: ``imap.mail.me.com``
 ```yaml
 services:
   app:
-    image: tutorialwork/kleinanzeigen-ads-renewer:1.2.0
+    image: tutorialwork/kleinanzeigen-ads-renewer:latest
     environment:
       - IMAP_SERVERS_GMAIL_HOST=imap.gmail.com
       - IMAP_SERVERS_GMAIL_USERNAME=YOUR_GMAIL_EMAIL

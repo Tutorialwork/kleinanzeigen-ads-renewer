@@ -85,16 +85,6 @@
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
                 <configuration>
-                    <image>
-                        <name>tutorialwork/kleinanzeigen-ads-renewer:${project.version}</name>
-                        <buildpacks>
-                            <buildpack>paketobuildpacks/java</buildpack>
-                        </buildpacks>
-                        <env>
-                            <BP_JVM_VERSION>21</BP_JVM_VERSION>
-                            <BP_JVM_TYPE>JRE</BP_JVM_TYPE>
-                        </env>
-                    </image>
                     <excludes>
                         <exclude>
                             <groupId>org.projectlombok</groupId>
