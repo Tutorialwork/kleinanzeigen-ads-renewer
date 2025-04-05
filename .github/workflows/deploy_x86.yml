@@ -1,4 +1,4 @@
-name: Deploy Docker Image
+name: Deploy x86 Docker Image
 
 on:
   workflow_run:
@@ -9,7 +9,7 @@ on:
 
 jobs:
   build_and_push:
-    runs-on: ubuntu-24.04-arm
+    runs-on: ubuntu-latest
 
     steps:
       - name: Checkout code
